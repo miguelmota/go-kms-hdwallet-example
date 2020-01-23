@@ -12,11 +12,7 @@ import (
 )
 
 func main() {
-	entropy, err := hdwallet.NewEntropy(256)
-	if err != nil {
-		panic(err)
-	}
-
+	// Authenticate with AWS
 	sess, err := awsSession.NewSessionWithOptions(awsSession.Options{
 		SharedConfigState: awsSession.SharedConfigEnable,
 	})
@@ -40,6 +36,12 @@ func main() {
 	}
 
 	listOutput, err = kms.ListKeys(&awsKms.ListKeysInput{})
+	if err != nil {
+		panic(err)
+	}
+
+	// Generate random entropy
+	entropy, err := hdwallet.NewEntropy(256)
 	if err != nil {
 		panic(err)
 	}
@@ -86,6 +88,8 @@ func main() {
 
 	// This is user defined message
 	message := "hello world"
+
+	// Sign message
 	hash := crypto.Keccak256Hash([]byte(message))
 	signature, err := wallet.SignHash(account, hash.Bytes())
 	if err != nil {
@@ -95,7 +99,7 @@ func main() {
 	fmt.Printf("entropy: %x\n", string(entropy))
 	fmt.Printf("mnemonic: %s\n", mnemonic)
 	fmt.Printf("hdpath: %s\n", hdPath)
-	fmt.Printf("account: 0x%x\n", account.Address.Hex())
+	fmt.Printf("account: 0x%s\n", account.Address.Hex())
 	fmt.Printf("message: %s\n", message)
 	fmt.Printf("signature: 0x%x\n", signature)
 }
